@@ -17,7 +17,7 @@ const envVarsSchema = Joi.object()
     MONGODB_URL: Joi.string().required().description("Mongo DB url"),
   })
   .unknown();
-
+ 
 const { value: envVars, error } = envVarsSchema.prefs({ errors: { label: 'key' } }).validate(process.env);
 
 if (error) {

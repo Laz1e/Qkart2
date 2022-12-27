@@ -12,6 +12,9 @@ const userSchema = mongoose.Schema(
       trim: true,
     },
     email: {
+      type: String,
+      required: true,
+      unique: true,
     },
     password: {
       type: String,
@@ -43,6 +46,8 @@ const userSchema = mongoose.Schema(
  * @returns {Promise<boolean>}
  */
 userSchema.statics.isEmailTaken = async function (email) {
+  const user = await this.findOne({email});
+  return !!user;
 };
 
 
@@ -56,3 +61,6 @@ userSchema.statics.isEmailTaken = async function (email) {
 /**
  * @typedef User
  */
+ const User = mongoose.model("User", userSchema);
+
+ module.exports.User = User;
