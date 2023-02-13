@@ -44,14 +44,42 @@ const { userService } = require("../services");
 const getUser = catchAsync(async (req, res) => {
   let { userId } = req.params;
   console.log(userId);
-  let user =await userService.getUserById(userId);
-  if(!user) {
+
+  let result =await userService.getUserById(userId);
+  
+  if(!result) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found")
   }
-  res.status(200).json(user);
+
+  if(result.email != req.user.email){
+    throw new ApiError(
+      httpStatus.FORBIDDEN, "User not authorized to access this resource"
+    );
+  }
+  res.status(200).json(result);
 });
+
+
+// const getAllUsers = async (req, res) => {
+//   let result = await userService.getAllUsers();
+//   res.json(result);
+// }
+
+const createUser = async (req, res) => {
+
+  try {
+    const body = req.body;
+    const newUser = await userService.createUser(body);
+    res.status(200).json(newUser);
+  } catch (error) {
+    throw new ApiError(200,"Emai already taken");
+  }
+
+}
 
 
 module.exports = {
   getUser,
+  // getAllUsers,
+  createUser,
 };

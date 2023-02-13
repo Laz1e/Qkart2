@@ -1,6 +1,8 @@
 const httpStatus = require("http-status");
 const catchAsync = require("../utils/catchAsync");
 const { authService, userService, tokenService } = require("../services");
+const ApiError = require("../utils/ApiError");
+
 
 /**
  * Perform the following steps:
@@ -31,7 +33,32 @@ const { authService, userService, tokenService } = require("../services");
  *}
  *
  */
+
+const respo = async(user) => {
+  const data = await authService.register(user);
+  return data;
+}
+
 const register = catchAsync(async (req, res) => {
+  
+  const user = await userService.createUser(req.body);
+  console.log(user);
+  // const response = await respo(user);
+  // SVGForeignObjectElement.log(response);
+  // const user2 = await authService.register(user)
+  const tokens = await tokenService.generateAuthTokens(user);
+  const response = {
+    "user": {
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+      walletMoney: user.walletMoney,
+    },
+    "tokens": tokens,
+  }
+  console.log(response);
+
+  res.status(201).json(response);
 });
 
 /**
@@ -63,8 +90,12 @@ const register = catchAsync(async (req, res) => {
  *}
  *
  */
-const login = catchAsync(async (req, res) => {
-});
+ const login = catchAsync(async (req, res) => {
+  const { email, password } = req.body;
+  const user = await authService.loginUserWithEmailAndPassword(email, password);
+  const tokens = await tokenService.generateAuthTokens(user);
+  res.status(200).send({ user, tokens });
+  })
 
 module.exports = {
   register,

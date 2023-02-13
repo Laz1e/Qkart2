@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { objectId } = require("./custom.validation");
+const { objectId,password } = require("./custom.validation");
 
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement request validation for "/v1/users/:userId" endpoint
 /**
@@ -14,7 +14,17 @@ const getUser = {
   }),
 };
 
+const createUser = {
+  body: Joi.object().keys({
+    name : Joi.string().required(),
+    email : Joi.string().required(),
+    password : Joi.string().required().custom(password),
+    walletMoney : Joi.number().required(),
+    address : Joi.string()
+  }),
+};
 
 module.exports = {
   getUser,
+  createUser,
 };

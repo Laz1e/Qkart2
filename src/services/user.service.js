@@ -3,6 +3,14 @@ const httpStatus = require("http-status");
 const ApiError = require("../utils/ApiError");
 const bcrypt = require("bcryptjs");
 
+
+// const getAllUsers = async () =>{
+//   let data = await User.find({});
+//   console.log(data);
+//   return data;
+// }
+
+
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement getUserById(id)
 /**
  * Get User by id
@@ -48,12 +56,16 @@ const getUserByEmail = async (email) => {
  * 200 status code on duplicate email - https://stackoverflow.com/a/53144807
  */
 
-const createUser = async(userBody) => {
-  if(await User.isEmailTaken(userBody.email)){
-    throw new ApiError(httpStatus.OK,"Email already taken");
-  }
 
-  const user = await User.create(userBody);
+
+ const createUser = async (userBody) =>{
+  if (await User.isEmailTaken(userBody.email)) {
+    throw new ApiError(httpStatus.OK, "Email already taken");
+  }
+  const hashedPassword = await bcrypt.hash(userBody.password, 10);
+
+  // Step 3 : Create the user with User.create
+  const user = await User.create({...userBody, password: hashedPassword});
   return user;
 }
 
@@ -61,4 +73,5 @@ module.exports = {
   getUserById,
   getUserByEmail,
   createUser,
+
 };
