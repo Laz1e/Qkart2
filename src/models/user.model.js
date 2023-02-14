@@ -27,7 +27,6 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique:true,
       minlength: 8,
       validate(value) {
         if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
