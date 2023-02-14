@@ -10,21 +10,19 @@ const { objectId,password } = require("./custom.validation");
  */
 const getUser = {
   params: Joi.object().keys({
-    userId: Joi.string().custom(objectId),
   }),
 };
 
-const createUser = {
+const setAddress = {
+  params: Joi.object().keys({
+    userId: Joi.string().custom(objectId),
+  }),
   body: Joi.object().keys({
-    name : Joi.string().required(),
-    email : Joi.string().required(),
-    password : Joi.string().required().custom(password),
-    walletMoney : Joi.number().required(),
-    address : Joi.string()
+    address: Joi.string().required().min(20),
   }),
 };
 
 module.exports = {
   getUser,
-  createUser,
+  setAddress,
 };
