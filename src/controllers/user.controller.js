@@ -50,22 +50,47 @@ const { userService } = require("../services");
  * @returns {User | {address: String}}
  *
  */
-const getUser = catchAsync(async (req, res) => {
-  let { userId } = req.params;
-  console.log(userId);
+ const getUser = catchAsync(async (req, res) => {
+  if (req.query.q === "address") {
+    try {
+      let result = await userService.getUserAddressById(req.params.userId);
+      if (!result) {
+        throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+      }
+      if (req.user.email !== result.email) {
+        throw new ApiError(httpStatus.FORBIDDEN, "User not found");
+      }
+      res.status(200).json({"address":result.address});
 
-  let result =await userService.getUserById(userId);
-  
-  if(!result) {
-    throw new ApiError(httpStatus.NOT_FOUND, "User not found")
+    }catch(error){
+      res.status(error.statusCode).json(error.message)
+    }
+    
+  }
+  else {
+
+    try {
+
+      let result = await userService.getUserById(req.params.userId);
+
+      if (!result) {
+        throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+      }
+
+      if (req.user.email !== result.email) {
+        throw new ApiError(httpStatus.FORBIDDEN, "User not found");
+      }
+
+      res.status(200).json(result);
+
+    } catch (error) {
+      res.status(error.statusCode).json(error.message)
+    }
+
   }
 
-  if(result.email != req.user.email){
-    throw new ApiError(
-      httpStatus.FORBIDDEN, "User not authorized to access this resource"
-    );
-  }
-  res.status(200).json(result);
+
+
 });
 
 

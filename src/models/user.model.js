@@ -96,7 +96,10 @@ userSchema.methods.isPasswordMatch = async function (password) {
   }
 };
 
-
+userSchema.methods.hasSetNonDefaultAddress = async function () {
+  console.log(this.address);
+  return this.address && this.address !== config.default_address;
+}
 
 /*
  * Create a Mongoose model out of userSchema and export the model as "User"
