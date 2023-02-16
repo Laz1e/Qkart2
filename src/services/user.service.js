@@ -78,6 +78,12 @@ const getUserByEmail = async (email) => {
  * @returns {Promise<User>}
  */
  const getUserAddressById = async (id) => {
+
+  let data = await User.findOne({
+    "_id":id},
+    {address:1,email:1}
+    );
+    return data;
 };
 
 /**
@@ -96,7 +102,8 @@ module.exports = {
   getUserById,
   getUserByEmail,
   createUser,
-
+  getUserAddressById,
+  setAddress,
 };
 
 
