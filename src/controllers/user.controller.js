@@ -106,7 +106,7 @@ const createUser = async (req, res) => {
     const newUser = await userService.createUser(body);
     res.status(200).json(newUser);
   } catch (error) {
-    throw new ApiError(200,"Emai already taken");
+    throw new ApiError(200,"Email already taken");
   }
 
 }
