@@ -53,12 +53,13 @@ const { userService } = require("../services");
  const getUser = catchAsync(async (req, res) => {
   if (req.query.q === "address") {
     try {
-      let result = await userService.getUserAddressById(req.params.userId);
+      const {id} = req.params;
+      let result = await userService.getUserAddressById(id);
       if (!result) {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");
       }
       if (req.user.email !== result.email) {
-        throw new ApiError(httpStatus.FORBIDDEN, "User not found");
+        throw new ApiError(httpStatus.FORBIDDEN, "Unauthorized to view other user's data");
       }
       res.status(200).json({"address":result.address});
 
@@ -70,15 +71,15 @@ const { userService } = require("../services");
   else {
 
     try {
-
-      let result = await userService.getUserById(req.params.userId);
+      const {id} = req.params;
+      let result = await userService.getUserById(id);
 
       if (!result) {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");
       }
 
       if (req.user.email !== result.email) {
-        throw new ApiError(httpStatus.FORBIDDEN, "User not found");
+        throw new ApiError(httpStatus.FORBIDDEN, "Unauthorized to view other user's data");
       }
 
       res.status(200).json(result);

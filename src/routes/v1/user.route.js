@@ -9,7 +9,7 @@ const router = express.Router();
 // TODO: CRIO_TASK_MODULE_UNDERSTANDING_BASICS - Implement a route definition for `/v1/users/:userId`
 // router.get("/all", auth, userController.getAllUsers);
 
-router.get("/:userId",auth ,validate(userValidation.getUser), userController.getUser );
+router.get("/:id",auth ,validate(userValidation.getUser), userController.getUser );
 
 
 

@@ -10,6 +10,7 @@ const { objectId,password } = require("./custom.validation");
  */
 const getUser = {
   params: Joi.object().keys({
+    id: Joi.string().custom(objectId, "id validation")
   }),
 };
 

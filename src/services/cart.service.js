@@ -53,63 +53,107 @@ const getCartByUser = async (user) => {
  * @throws {ApiError}
  */
 const addProductToCart = async (user, productId, quantity) => {
-  const userCart = await Cart.findOne({ email: user.email });
-  const product = await Product.findOne({ _id: productId });
+  // const userCart = await Cart.findOne({ email: user.email });
+  
+  // const product = await Product.findById({ _id: productId });
 
-  if (!product) {
+  // if (!product) {
+  //   throw new ApiError(
+  //     httpStatus.BAD_REQUEST,
+  //     "Product doesn't exist in database"
+  //   );
+  // }
+
+  // if (!userCart) {
+  //   try {
+
+  //     const cartItems = [
+  //       {
+  //         product,
+  //         quantity,
+  //       },
+  //     ];
+
+  //     const cartItem = {
+  //       email: user.email,
+  //       cartItems:cartItems,
+  //       paymentOption: config.default_payment_option,
+  //     };
+
+  //     const newCart = Cart.create(cartItem);
+      
+  //     return newCart;
+
+  //   } catch (err) {
+  //     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR);
+  //   }
+
+  // } else {
+  //   let temp = await userCart.cartItems.find(item =>
+  //     String(item.product._id === productId)
+  //   );
+
+  //   if (temp) {
+  //     throw new ApiError(
+  //       httpStatus.BAD_REQUEST,
+  //       "Product already in cart. Use the cart sidebar to update or remove product from cart"
+  //     );
+  //   } else {
+  //     try {
+  //       var objCart = {
+  //         "product": product,
+  //         "quantity": quantity,
+  //       };
+
+  //       await userCart.cartItems.push(objCart);
+  //       await userCart.save();
+
+  //     } catch (err) {
+  //       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR);
+  //     }
+  //   }
+  // }
+
+  // return userCart;
+
+  let cart = await Cart.findOne({ email: user.email });
+  if (!cart) {
+    cart = await Cart.create({ email: user.email });
+    if (!cart) {
+      throw new ApiError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Internal Server Error"
+      );
+    }
+  }
+
+  let productExists = await Product.findOne({ _id: productId });
+
+  if (!productExists) {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
       "Product doesn't exist in database"
     );
   }
-
-  if (!userCart) {
-    try {
-      const cartItem = {
-        email: user.email,
-        cartItems: [
-          {
-            product: product,
-            quantity: quantity,
-          },
-        ],
-        paymentOption: config.default_payment_option,
-      };
-
-      const newCart = Cart.create(cartItem);
-      return newCart;
-
-    } catch (err) {
-      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-  } else {
-    let temp = await userCart.cartItems.find(item =>
-      String(item.product._id === productId)
+  console.log(cart)
+  const productFound = cart.cartItems.filter((cartItem) => {
+    if (cartItem.product._id == productId) return true;
+    else return false;
+  });
+  if (productFound.length > 0) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "Product already in cart. Use the cart sidebar to update or remove product from cart"
     );
-
-    if (temp) {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        "Product already in cart. Use the cart sidebar to update or remove product from cart"
-      );
-    } else {
-      try {
-        var objCart = {
-          "product": product,
-          "quantity": quantity,
-        };
-
-        await userCart.cartItems.push(objCart);
-        await userCart.save();
-
-      } catch (err) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
+  } else {
+    
+    cart.cartItems.push({
+      product: productExists,
+      quantity,
+    });
   }
-
-  return userCart;
+  const productAdd = await cart.save();
+  return productAdd;
 };
 
 /**
