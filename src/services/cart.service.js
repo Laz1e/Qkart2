@@ -260,4 +260,5 @@ module.exports = {
   addProductToCart,
   updateProductInCart,
   deleteProductFromCart,
+  checkout,
 };
