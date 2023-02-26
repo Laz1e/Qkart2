@@ -54,7 +54,7 @@ const getCartByUser = async (user) => {
  */
 const addProductToCart = async (user, productId, quantity) => {
   // const userCart = await Cart.findOne({ email: user.email });
-  
+
   // const product = await Product.findById({ _id: productId });
 
   // if (!product) {
@@ -81,7 +81,7 @@ const addProductToCart = async (user, productId, quantity) => {
   //     };
 
   //     const newCart = Cart.create(cartItem);
-      
+
   //     return newCart;
 
   //   } catch (err) {
@@ -135,7 +135,7 @@ const addProductToCart = async (user, productId, quantity) => {
       "Product doesn't exist in database"
     );
   }
-  console.log(cart)
+  console.log(cart);
   const productFound = cart.cartItems.filter((cartItem) => {
     if (cartItem.product._id == productId) return true;
     else return false;
@@ -146,7 +146,6 @@ const addProductToCart = async (user, productId, quantity) => {
       "Product already in cart. Use the cart sidebar to update or remove product from cart"
     );
   } else {
-    
     cart.cartItems.push({
       product: productExists,
       quantity,
@@ -181,7 +180,6 @@ const addProductToCart = async (user, productId, quantity) => {
  * @throws {ApiError}
  */
 const updateProductInCart = async (user, productId, quantity) => {
-  
   var userCart = await Cart.findOne({ email: user.email });
   const product = await Product.findOne({ _id: productId });
 
@@ -200,14 +198,14 @@ const updateProductInCart = async (user, productId, quantity) => {
   }
 
   var index = await userCart.cartItems.findIndex(
-    item => String(item.product._id) === productId
+    (item) => String(item.product._id) === productId
   );
   if (index === -1) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Product not in cart");
   }
 
   userCart.cartItems[index].quantity = quantity;
-  userCart.markModified('cartItems');
+  userCart.markModified("cartItems");
 
   await userCart.save();
   return userCart;
@@ -238,7 +236,7 @@ const deleteProductFromCart = async (user, productId) => {
   }
 
   var deleteId;
-  let temp = await userCart.cartItems.find(item => {
+  let temp = await userCart.cartItems.find((item) => {
     if (String(item.product._id) === productId) {
       deleteId = item._id;
       return true;
@@ -250,9 +248,50 @@ const deleteProductFromCart = async (user, productId) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Product not in cart");
   }
 
-  await userCart.cartItems.pull({ "_id": deleteId });
-  userCart.markModified('cartItems');
+  await userCart.cartItems.pull({ _id: deleteId });
+  userCart.markModified("cartItems");
   await userCart.save();
+};
+
+const checkout = async (user) => {
+  let userCart = await Cart.findOne({ email: user.email });
+  console.log(userCart);
+  
+  if (!userCart) {
+    throw new ApiError(httpStatus.NOT_FOUND,"User does not have a cart");
+  }
+
+  if (userCart.cartItems.length === 0) {
+    throw new ApiError(httpStatus.BAD_REQUEST,"Cart is empty");
+  }
+
+  let isDefaultAddress = await user.hasSetNonDefaultAddress();
+  // console.log(isDefaultAddress);
+
+  if (!isDefaultAddress) {
+    throw new ApiError(httpStatus.BAD_REQUEST,"Address not set");
+  }
+
+  const productValue = await userCart.cartItems.reduce(function (
+    accumulator,
+    currItem
+  ) {
+    return accumulator + currItem.quantity * currItem.product.cost;
+  },
+  0);
+
+  if (user.walletMoney < productValue) {
+    throw new ApiError(httpStatus.BAD_REQUEST,"Insufficient balance");
+  }
+
+  user.walletMoney = user.walletMoney - productValue;
+  await user.save();
+
+  userCart.cartItems = [];
+  userCart.markModified("cartItems");
+  await userCart.save();
+
+  // return userCart;
 };
 
 module.exports = {

@@ -1,6 +1,7 @@
 const httpStatus = require("http-status");
 const catchAsync = require("../utils/catchAsync");
 const { cartService } = require("../services");
+const { http } = require("winston");
 
 /**
  * Fetch the cart details
@@ -107,10 +108,10 @@ const updateProductInCart = catchAsync(async (req, res) => {
  * Checkout user's cart
  */
 const checkout = catchAsync(async (req, res) => {
-   await cartService.checkout();
+
+   await cartService.checkout(req.user);
   return (
-    res
-      .send()
+    res.status(httpStatus.NO_CONTENT).send()
   );
 });
 
